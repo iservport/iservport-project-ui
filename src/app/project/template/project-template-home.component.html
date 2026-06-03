@@ -1,0 +1,36 @@
+<section class="template-home">
+  <aside class="home-filter" aria-label="Project topic filters">
+    <header>
+      <span>PROJECT_TOPIC_FILTER</span>
+      <h2>Templates</h2>
+    </header>
+
+    <button type="button" class="filter-row active">All topics</button>
+    <button type="button" class="filter-row">Planning</button>
+    <button type="button" class="filter-row">Execution</button>
+  </aside>
+
+  <main class="home-board" aria-label="Project template board">
+    <header class="board-header">
+      <div>
+        <h1>Project templates</h1>
+        <p>Start new project scopes from reusable topic templates.</p>
+      </div>
+
+      <nav class="board-header__actions" aria-label="Project sections">
+        <a routerLink="/">Projects</a>
+        <a routerLink="/template" class="active">Templates</a>
+      </nav>
+    </header>
+
+    <section class="card-list" aria-label="Template cards">
+      @for (template of templates; track template.id) {
+        <article class="board-card">
+          <span class="board-card__code">{{ template.topic }}</span>
+          <h2>{{ template.title }}</h2>
+          <p>Template scope and default project structure.</p>
+        </article>
+      }
+    </section>
+  </main>
+</section>

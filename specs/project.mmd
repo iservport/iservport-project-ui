@@ -1,0 +1,61 @@
+stateDiagram-v2
+    [*] --> projectHome: /
+    [*] --> projectTemplateHome: /template
+
+    projectNav --> projectContainer: /{projectId}
+    projectNav --> projectLightContainer: /light/{phaseId}
+    projectNav --> projectPhaseContainer: /phase/{phaseId}
+    projectNav --> projectReportContainer: /report/{reportId}
+    projectNav --> projectConclusionContainer: /conclusion/{projectId}
+    projectNav --> projectTeamContainer: /conclusion/{projectId}
+
+    state projectHome {
+        PROJECT_HOME_FILTER --> projectBoard: filter
+        projectBoard --> projectCreateModal: create scope
+        projectBoard --> projectContainer: /{projectId}
+        projectBoard --> projectLightContainer: /light/{projectId}
+    }
+
+    state projectTemplateHome {
+        PROJECT_TOPIC_FILTER --> projectTemplateBoard: filter
+    }
+
+    state projectShell {
+        projectHeader
+
+        state projectContainer {
+            projectSummary --> projectEditModal: edit project
+        }
+
+        state projectLightContainer {
+            PROJECT_LIGHT_FILTER --> projectLightList: filter
+            projectLightList --> projectLightEditModal: edit report
+            projectReviewList --> projectReviewEditModal: edit project
+        }
+
+        state projectConclusionContainer {
+            projectConclusion --> projectConclusionEditModal: edit conclusion
+        }
+
+        state projectTeamContainer {
+            projectTeamList --> projectTeamModal: edit team
+        }
+    }
+
+    state projectPhaseShell {
+        projectPhaseHeader
+
+        state projectPhaseContainer {
+            PROJECT_PHASE_FILTER --> projectPhaseList: filter
+            projectPhaseList --> projectPhaseEditModal: edit phase
+        }
+    }
+
+    state projectReportShell {
+        projectReportHeader
+
+        state projectReportContainer {
+            PROJECT_REPORT_FILTER --> projectReportList: filter
+            projectReportList --> projectReportEditModal: edit report
+        }
+    }

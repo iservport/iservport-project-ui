@@ -1,0 +1,20 @@
+<section class="project-shell">
+  <header class="project-shell__header">
+    <div>
+      <a class="project-shell__back" routerLink="/">← Projects</a>
+      <h1>{{ title() }}</h1>
+      @if (subtitle()) {
+        <p>{{ subtitle() }}</p>
+      }
+    </div>
+
+    <nav class="project-shell__nav" aria-label="Project navigation">
+      <a routerLink="/" [class.active]="active() === 'projects'">Projects</a>
+      <a routerLink="/template" [class.active]="active() === 'templates'">Templates</a>
+    </nav>
+  </header>
+
+  <main class="project-shell__main">
+    <ng-content />
+  </main>
+</section>

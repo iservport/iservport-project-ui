@@ -1,0 +1,69 @@
+.project-shell {
+  min-height: 100vh;
+  background: #f1f5f9;
+}
+
+.project-shell__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem 0;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.project-shell__back {
+  display: inline-flex;
+  margin-bottom: 0.35rem;
+  color: #2563eb;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.project-shell__header h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.project-shell__header p {
+  margin: 0.25rem 0 1rem;
+  color: #64748b;
+}
+
+.project-shell__nav {
+  display: flex;
+  gap: 1rem;
+  min-height: 44px;
+}
+
+.project-shell__nav a {
+  display: inline-flex;
+  align-items: center;
+  border-bottom: 2px solid transparent;
+  color: #64748b;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.project-shell__nav a.active {
+  border-bottom-color: #2563eb;
+  color: #0f172a;
+}
+
+.project-shell__main {
+  padding: 1.5rem;
+}
+
+@media (max-width: 720px) {
+  .project-shell__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .project-shell__main {
+    padding: 1rem;
+  }
+}

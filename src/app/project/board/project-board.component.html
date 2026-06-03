@@ -1,0 +1,42 @@
+<main class="home-board" aria-label="Project board">
+  <header class="board-header">
+    <div>
+      <h1>Projects</h1>
+      <p>Track projects, phases, reports, conclusions, and teams.</p>
+    </div>
+
+    <nav class="board-header__actions" aria-label="Project sections">
+      <a routerLink="/" class="active">Projects</a>
+      <a routerLink="/template">Templates</a>
+    </nav>
+  </header>
+
+  <header class="board-toolbar">
+    <div class="board-toolbar__primary">
+      <label class="board-search">
+        <span class="visually-hidden">Search projects</span>
+        <input type="search" class="form-control" placeholder="Search projects" />
+      </label>
+
+      <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-2">
+        <span aria-hidden="true">+</span>
+        New project
+      </button>
+    </div>
+
+    <div class="board-toolbar__secondary">
+      <span class="board-meta">{{ cards.length }} projects</span>
+    </div>
+  </header>
+
+  <section class="card-list" aria-label="Project cards">
+    @for (card of cards; track card.id) {
+      <a class="board-card" [routerLink]="[card.id]">
+        <span class="board-card__code">{{ card.code }}</span>
+        <h2>{{ card.title }}</h2>
+        <p>{{ card.owner }}</p>
+        <span class="status-badge">{{ card.status }}</span>
+      </a>
+    }
+  </section>
+</main>

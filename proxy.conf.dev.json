@@ -1,0 +1,26 @@
+{
+  "/login": {
+    "target": "https://0.0.0.0:8443",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "headers": {
+      "X-Dev-Proxy": "true"
+    }
+  },
+  "/logout": {
+    "target": "https://0.0.0.0:8443",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "headers": {
+      "X-Dev-Proxy": "true"
+    }
+  },
+  "/app": {
+    "target": "https://0.0.0.0:8443",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "/login": {
+    "target": "https://iservport.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "headers": {
+      "X-Dev-Proxy": "true"
+    }
+  },
+  "/logout": {
+    "target": "https://iservport.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "headers": {
+      "X-Dev-Proxy": "true"
+    }
+  },
+  "/app": {
+    "target": "https://iservport.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}
