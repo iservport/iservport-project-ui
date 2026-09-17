@@ -1,14 +1,8 @@
-import { Component, input } from '@angular/core';
-
-import { ProjectPageShellComponent } from '../shared/project-page-shell.component';
-import { ProjectPlaceholderPanelComponent } from '../shared/project-placeholder-panel.component';
-
+import { Component } from '@angular/core';
+import { ProjectContainerComponent } from '../container/project-container.component';
 @Component({
-  selector: 'app-project-conclusion-container',
-  imports: [ProjectPageShellComponent, ProjectPlaceholderPanelComponent],
-  templateUrl: './project-conclusion-container.component.html',
-  styleUrl: './project-conclusion-container.component.css'
+  selector: 'project-conclusion-container',
+  imports: [ProjectContainerComponent],
+  template: `<project-summary-container [conclusion]="true" />`,
 })
-export class ProjectConclusionContainerComponent {
-  readonly projectId = input.required<string>();
-}
+export class ProjectConclusionContainerComponent {}

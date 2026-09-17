@@ -1,45 +1,21 @@
-import { Routes } from '@angular/router';
-
-import { ProjectConclusionContainerComponent } from './project/conclusion/project-conclusion-container.component';
-import { ProjectContainerComponent } from './project/container/project-container.component';
-import { ProjectHomeComponent } from './project/home/project-home.component';
-import { ProjectLightContainerComponent } from './project/light/project-light-container.component';
-import { ProjectPhaseContainerComponent } from './project/phase/project-phase-container.component';
-import { ProjectReportContainerComponent } from './project/report/project-report-container.component';
-import { ProjectTeamContainerComponent } from './project/team/project-team-container.component';
-import { ProjectTemplateHomeComponent } from './project/template/project-template-home.component';
-
+import type { Routes } from '@angular/router';
+import { CUSTOM_AUTH_WORKSPACE } from '@iservport/iservport-angular-ui';
+import { projectRoutes } from './project/home/project.routes';
+import { projectTemplateRoutes } from './project/template/project-template.routes';
 export const routes: Routes = [
   {
-    path: '',
-    component: ProjectHomeComponent
+    path: 'start',
+    loadComponent: () => import('@iservport/iservport-angular-ui').then((m) => m.StartComponent),
   },
   {
-    path: 'template',
-    component: ProjectTemplateHomeComponent
+    path: 'auth',
+    loadComponent: () =>
+      import('@iservport/iservport-angular-ui').then((m) => m.CustomAuthComponent),
+    providers: [{ provide: CUSTOM_AUTH_WORKSPACE, useValue: 'PROJECT' }],
   },
-  {
-    path: 'light/:projectId',
-    component: ProjectLightContainerComponent
-  },
-  {
-    path: 'phase/:phaseId',
-    component: ProjectPhaseContainerComponent
-  },
-  {
-    path: 'report/:reportId',
-    component: ProjectReportContainerComponent
-  },
-  {
-    path: 'conclusion/:projectId',
-    component: ProjectConclusionContainerComponent
-  },
-  {
-    path: 'team/:projectId',
-    component: ProjectTeamContainerComponent
-  },
-  {
-    path: ':projectId',
-    component: ProjectContainerComponent
-  }
+  ...projectTemplateRoutes,
+  ...projectRoutes,
+  { path: 'light/:projectId', redirectTo: 'schedule/:projectId' },
+  { path: 'report/:reportId', redirectTo: 'id/:reportId' },
+  { path: ':projectId', redirectTo: 'project/:projectId' },
 ];

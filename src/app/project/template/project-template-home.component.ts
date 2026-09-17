@@ -1,23 +1,8 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-
+import { ProjectHomeComponent } from '../home/project-home.component';
 @Component({
-  selector: 'app-project-template-home',
-  imports: [RouterLink],
-  templateUrl: './project-template-home.component.html',
-  styleUrl: './project-template-home.component.css'
+  selector: 'project-template-home',
+  imports: [ProjectHomeComponent],
+  template: `<project-home />`,
 })
-export class ProjectTemplateHomeComponent {
-  readonly templates = [
-    {
-      id: 'topic-discovery',
-      title: 'Discovery project',
-      topic: 'Planning'
-    },
-    {
-      id: 'topic-delivery',
-      title: 'Delivery project',
-      topic: 'Execution'
-    }
-  ];
-}
+export class ProjectTemplateHomeComponent {}

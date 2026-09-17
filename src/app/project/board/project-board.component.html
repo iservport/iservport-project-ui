@@ -1,42 +1,80 @@
-<main class="home-board" aria-label="Project board">
-  <header class="board-header">
-    <div>
-      <h1>Projects</h1>
-      <p>Track projects, phases, reports, conclusions, and teams.</p>
+<main class="project-panel">
+  <header class="project-toolbar">
+    <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+      <h1>{{ (store.templates ? 'PROJECT_TEMPLATES' : 'PROJECTS') | i18n }}</h1>
+      <custom-top-board-navigation [menu]="navigation" />
     </div>
-
-    <nav class="board-header__actions" aria-label="Project sections">
-      <a routerLink="/" class="active">Projects</a>
-      <a routerLink="/template">Templates</a>
-    </nav>
+    <div class="d-flex align-items-center gap-3 mt-3">
+      <custom-search-bar
+        class="flex-grow-1"
+        [filter]="store.filter()"
+        [placeholder]="'PROJECT_SEARCH' | i18n"
+        (filterChange)="store.updateFilter($event)"
+      />
+      @if (store.canCreate()) {
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="!store.categoryId() || store.saving()"
+          (click)="store.create()"
+        >
+          {{ (store.templates ? 'PROJECT_NEW_TEMPLATE' : 'PROJECT_NEW') | i18n }}
+        </button>
+      }
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <span class="text-secondary"
+        >{{ store.page().totalElements }} {{ 'PROJECT_RESULTS' | i18n }}</span
+      ><custom-pagination [page]="store.page()" (change)="store.load($event)" />
+    </div>
   </header>
-
-  <header class="board-toolbar">
-    <div class="board-toolbar__primary">
-      <label class="board-search">
-        <span class="visually-hidden">Search projects</span>
-        <input type="search" class="form-control" placeholder="Search projects" />
-      </label>
-
-      <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-2">
-        <span aria-hidden="true">+</span>
-        New project
+  @if (store.loading()) {
+    <p role="status" class="p-4">{{ 'PROJECT_LOADING' | i18n }}</p>
+  } @else if (store.error()) {
+    <div class="alert alert-danger m-3" role="alert">
+      {{ store.error() | i18n }}
+      <button class="btn btn-secondary btn-sm" (click)="store.load()">
+        {{ 'PROJECT_RETRY' | i18n }}
       </button>
     </div>
-
-    <div class="board-toolbar__secondary">
-      <span class="board-meta">{{ cards.length }} projects</span>
-    </div>
-  </header>
-
-  <section class="card-list" aria-label="Project cards">
-    @for (card of cards; track card.id) {
-      <a class="board-card" [routerLink]="[card.id]">
-        <span class="board-card__code">{{ card.code }}</span>
-        <h2>{{ card.title }}</h2>
-        <p>{{ card.owner }}</p>
-        <span class="status-badge">{{ card.status }}</span>
-      </a>
+  } @else {
+    @if (store.statsError()) {
+      <p class="alert alert-warning mx-3" role="status">{{ store.statsError() | i18n }}</p>
     }
-  </section>
+    <section class="project-cards">
+      @for (item of store.page().content; track item.id) {
+        <a
+          class="project-card"
+          [routerLink]="store.templates ? ['/template/id', item.id] : ['/schedule', item.id]"
+        >
+          @if (!store.templates) {
+            <project-progress [progress]="store.stats()[item.id]?.progress" />
+          }
+          <span class="text-secondary small">{{ code(item) }}</span>
+          <h2>{{ title(item) }}</h2>
+          @if (!store.templates) {
+            @if (store.stats()[item.id]; as stats) {
+              <custom-stats [stats]="stats" />
+            }
+            <div class="d-flex justify-content-between gap-2 mt-auto">
+              <span class="badge text-bg-light">{{ status(item) | i18n }}</span
+              ><span class="text-secondary small">{{ date(item) | date: 'dd/MM/yyyy' }}</span>
+            </div>
+          }
+        </a>
+      } @empty {
+        <p class="text-secondary p-3">{{ 'PROJECT_EMPTY' | i18n }}</p>
+      }
+    </section>
+  }
 </main>
+@if (store.editor(); as value) {
+  <project-editor
+    [value]="value"
+    [fields]="store.fields"
+    [busy]="store.saving()"
+    [error]="store.saveError()"
+    (save)="store.save($event)"
+    (cancel)="store.closeEditor()"
+  />
+}

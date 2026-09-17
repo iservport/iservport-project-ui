@@ -1,0 +1,178 @@
+@if (store.project(); as project) {
+  <main class="project-page">
+    <section class="project-panel p-4">
+      <div class="d-flex gap-2 align-items-center flex-wrap mb-3">
+        <h2 class="h5 me-auto">{{ 'PROJECT_ACTIVITIES' | i18n }}</h2>
+        @if (store.canEdit()) {
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            [disabled]="saving()"
+            (click)="createPhase()"
+          >
+            {{ 'PROJECT_NEW_PHASE' | i18n }}</button
+          ><button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="!selected() || saving()"
+            (click)="createReport()"
+          >
+            {{ 'PROJECT_NEW_ACTIVITY' | i18n }}
+          </button>
+        }
+        <a class="btn btn-outline-secondary" [href]="'/api/report/export/xls/' + project.id">{{
+          'PROJECT_EXPORT' | i18n
+        }}</a>
+      </div>
+      @if (statsError()) {
+        <p role="status" class="alert alert-warning">{{ 'PROJECT_STATS_ERROR' | i18n }}</p>
+      }
+      @if (stats()[selected()]; as stats) {
+        <div class="mb-3">
+          <project-progress [progress]="stats.progress" />
+          <div class="mt-2"><custom-stats [stats]="stats" /></div>
+        </div>
+      }
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <label for="phase" class="form-label">{{ 'PROJECT_PHASE' | i18n }}</label
+          ><select
+            id="phase"
+            class="form-select"
+            [ngModel]="selected()"
+            (ngModelChange)="select($event)"
+          >
+            @for (p of phases(); track p.id) {
+              <option [ngValue]="p.id">{{ p.literal }} · {{ p.phaseName }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label" for="resolution">{{ 'PROJECT_STATUS' | i18n }}</label
+          ><select
+            id="resolution"
+            class="form-select"
+            [(ngModel)]="resolution"
+            (ngModelChange)="load()"
+          >
+            <option value="">{{ 'PROJECT_ALL' | i18n }}</option>
+            <option value="P">{{ 'PROJECT_TODO' | i18n }}</option>
+            <option value="T">{{ 'PROJECT_DOING' | i18n }}</option>
+            <option value="D">{{ 'PROJECT_DONE' | i18n }}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label" for="view">{{ 'PROJECT_VIEW' | i18n }}</label
+          ><select id="view" class="form-select" [(ngModel)]="view">
+            <option value="BOARD">{{ 'PROJECT_BOARD' | i18n }}</option>
+            <option value="TABLE">{{ 'PROJECT_TABLE' | i18n }}</option>
+          </select>
+        </div>
+      </div>
+      @if (currentPhase(); as phase) {
+        <div class="d-flex justify-content-between gap-2 mb-3">
+          <div class="project-prose" [innerHTML]="phase.contentAsString"></div>
+          @if (store.canEdit()) {
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-secondary btn-sm" (click)="editPhase()">
+                {{ 'PROJECT_EDIT_PHASE' | i18n }}</button
+              ><button class="btn btn-outline-danger btn-sm" (click)="removePhase()">
+                {{ 'PROJECT_REMOVE' | i18n }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+      <project-timeline [phases]="phases()" [projectId]="project.id" />
+      <custom-search-bar
+        [filter]="search"
+        [placeholder]="'PROJECT_SEARCH' | i18n"
+        (filterChange)="search = $event; load()"
+      />
+      <div class="d-flex justify-content-between align-items-center my-3">
+        <span class="text-secondary">{{ page().totalElements }} {{ 'PROJECT_RESULTS' | i18n }}</span
+        ><custom-pagination [page]="page()" (change)="load($event)" />
+      </div>
+      @if (error()) {
+        <p class="alert alert-danger" role="alert">{{ error() | i18n }}</p>
+      }
+      @if (loading()) {
+        <p role="status">{{ 'PROJECT_LOADING' | i18n }}</p>
+      } @else {
+        @if (view === 'BOARD') {
+          <div class="project-kanban">
+            @for (status of ['P', 'T', 'D']; track status) {
+              <section class="project-kanban-column">
+                <h3 class="h6">{{ statusLabel(status) | i18n }}</h3>
+                @for (report of page().content; track report.id) {
+                  @if (report.resolution === status) {
+                    <a class="project-task" [routerLink]="['/id', report.id]"
+                      ><span class="small text-secondary">{{ report.reportCode }}</span>
+                      <h4 class="h6 mt-2">{{ report.summary }}</h4>
+                      <div
+                        class="progress board-card__progress my-2"
+                        role="progressbar"
+                        [attr.aria-label]="'PROJECT_COMPLETE' | i18n"
+                        [attr.aria-valuenow]="report.complete"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                      >
+                        <div
+                          class="progress-bar"
+                          [class.bg-success]="report.complete === 100"
+                          [class.bg-primary]="report.complete !== 100"
+                          [style.width.%]="report.complete"
+                        ></div>
+                      </div>
+                      <span class="small text-secondary">{{
+                        report.scheduledEndDate | date: 'dd/MM/yyyy'
+                      }}</span></a
+                    >
+                  }
+                }
+              </section>
+            }
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>{{ 'PROJECT_CODE' | i18n }}</th>
+                  <th>{{ 'PROJECT_NAME' | i18n }}</th>
+                  <th>{{ 'PROJECT_STATUS' | i18n }}</th>
+                  <th>{{ 'PROJECT_END' | i18n }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (report of page().content; track report.id) {
+                  <tr>
+                    <td>{{ report.reportCode }}</td>
+                    <td>
+                      <a [routerLink]="['/id', report.id]">{{ report.summary }}</a>
+                    </td>
+                    <td>{{ statusLabel(report.resolution) | i18n }}</td>
+                    <td>{{ report.scheduledEndDate | date: 'dd/MM/yyyy' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+        @if (!page().content.length) {
+          <p class="text-secondary mt-3">{{ 'PROJECT_EMPTY' | i18n }}</p>
+        }
+      }
+    </section>
+  </main>
+}
+@if (editor(); as value) {
+  <project-editor
+    [value]="value"
+    [fields]="editorType() === 'phase' ? phaseFields : reportFields"
+    [busy]="saving()"
+    [error]="saveError()"
+    (save)="save($event)"
+    (cancel)="close()"
+  />
+}

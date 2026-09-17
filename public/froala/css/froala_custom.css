@@ -1,0 +1,11 @@
+.fr-toolbar.fr-basic
+,.gray-theme.fr-toolbar.fr-basic
+,.dark-theme.fr-toolbar.fr-basic
+,.second-toolbar
+,.gray-theme .second-toolbar
+,.dark-theme .second-toolbar
+{
+    border-radius: 0;
+    -moz-border-radius: 0;
+    -webkit-border-radius: 0;
+}

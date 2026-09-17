@@ -1,0 +1,24 @@
+app-project:
+  external-references:
+    root:
+      - ~/workspace/iservport-root/app-plan/src/main/scala
+      - ~/workspace/iservport-root/helianto/src/main/scala
+    package: com.iservport.report
+  config: project.config
+  model: api/project/project.model
+  api: api/project/project-api.service
+  tokens: api/project/project.tokens
+  baseHref: /project/
+  legacyBaseHref: /report/
+  registry: specs/project-registry.md
+  apiSpec: specs/api.md
+  routes:
+    p1: {url: /, component: ProjectHomeComponent}
+    p2: {url: '/project/:projectId', shell: ProjectShellComponent, component: ProjectContainerComponent}
+    p3: {url: '/schedule/:projectId', shell: ProjectShellComponent, component: ProjectScheduleContainerComponent}
+    p4: {url: '/id/:reportId', shell: ProjectShellComponent, component: ProjectReportContainerComponent}
+    p5: {url: '/content/:reportId', shell: ProjectShellComponent, component: ProjectContentContainerComponent}
+    p6: {url: '/conclusion/:projectId', shell: ProjectShellComponent, component: ProjectConclusionContainerComponent}
+    p7: {url: '/team/:projectId', shell: ProjectShellComponent, component: ProjectTeamContainerComponent}
+    t1: {url: /template, component: ProjectTemplateHomeComponent}
+    t2: {url: '/template/id/:templateId', shell: ProjectShellComponent, component: ProjectTemplateContainerComponent}

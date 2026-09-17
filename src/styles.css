@@ -1,18 +1,118 @@
 @import '@fontsource-variable/nunito-sans/index.css';
 @import 'bootstrap/dist/css/bootstrap.min.css';
-
 :root {
   color-scheme: light;
   font-family: 'Nunito Sans Variable', 'Nunito Sans', Arial, sans-serif;
 }
-
 body {
   margin: 0;
   min-width: 320px;
   background: #f1f5f9;
   color: #0f172a;
+  font-family: inherit;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+.project-page {
+  padding: 20px;
+  max-width: 1500px;
+  margin: auto;
+  min-width: 0;
+}
+.project-panel {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  min-width: 0;
+  overflow: hidden;
+}
+.project-toolbar {
+  padding: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.project-toolbar h1,
+.project-header h1 {
+  font-size: 20px;
+  font-weight: 750;
+  margin: 0;
+}
+.project-header {
+  padding: 8px 0;
+}
+.project-prose {
+  overflow-wrap: anywhere;
+}
+.project-prose img {
+  max-width: 100%;
+  height: auto;
+}
+.project-kanban {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.project-kanban-column {
+  background: #f8fafc;
+  padding: 14px;
+  border-radius: 8px;
+  min-height: 120px;
+}
+.project-task {
+  display: block;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-top: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+.project-task:hover {
+  border-color: #3b82f6;
+}
+.progress {
+  height: 8px;
+}
+.project-template-logo {
+  max-width: 160px;
+  max-height: 100px;
+  object-fit: contain;
+}
+@media (max-width: 768px) {
+  .project-page {
+    padding: 10px;
+  }
+  .project-kanban {
+    grid-template-columns: 1fr;
+  }
+  .project-toolbar {
+    padding: 16px;
+  }
+}
+@media print {
+  iservport-app-shell aside,
+  custom-nav,
+  custom-breadcrumb,
+  button,
+  .btn {
+    display: none !important;
+  }
+  .project-page {
+    padding: 0;
+  }
+  .project-panel {
+    border: 0;
+  }
 }
 
-a {
-  color: inherit;
+.board-card__progress {
+  width: 100%;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eef2f6;
 }
