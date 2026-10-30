@@ -151,6 +151,11 @@ export class ProjectApiService {
   reviews(reportId: number) {
     return this.http.get<Review[]>(`${this.root}/review/list`, { params: { reportId } });
   }
+  projectReviews(projectId: number, page = 0) {
+    return this.http.get<Page<Review>>(`${this.root}/review/all`, {
+      params: { projectId, pageNumber: page + 1 },
+    });
+  }
   createReview(reportId: number) {
     return this.http.post<Review>(`${this.root}/review`, null, { params: { reportId } });
   }

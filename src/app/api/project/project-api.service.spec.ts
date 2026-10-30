@@ -52,6 +52,25 @@ describe('Project legacy API boundaries', () => {
     http.expectOne('/app/report?id=4475').flush({ id: 4475, reportFolderId: 203 });
   });
 
+  it('paginates 5W2H actions and project follow-ups with independent one-based requests', () => {
+    const filter = {
+      phases: { checked: [141] }, team: { checked: [500] },
+      resolutions: { checked: ['P', 'T'] }, priorities: { checked: ['0', '1', '2'] },
+      ordering: { checked: ['nextCheckDate'] }, search: 'training',
+    };
+    api.filterReports(filter, 1).subscribe();
+    const actions = http.expectOne('/app/report/filter?pageNumber=2');
+    expect(actions.request.method).toBe('POST');
+    expect(actions.request.body).toEqual(filter);
+    actions.flush({ ...emptyPage(), number: 1 });
+
+    let returned = -1;
+    api.projectReviews(203, 2).subscribe((page) => returned = page.number);
+    http.expectOne('/app/report/review/all?projectId=203&pageNumber=3')
+      .flush({ ...emptyPage(), number: 2 });
+    expect(returned).toBe(2);
+  });
+
   it('preserves optimistic locking and unedited metadata on updates', () => {
     const project: Project = {
       id: 203,

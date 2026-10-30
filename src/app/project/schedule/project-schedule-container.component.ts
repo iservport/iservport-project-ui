@@ -10,6 +10,7 @@ import {
   I18nPipe,
   I18nLookupService,
 } from '@iservport/iservport-angular-ui';
+import { ProjectActionPlanComponent } from '../improve/project-action-plan.component';
 import { ProjectWorkspaceStore } from '../shared/project-workspace.store';
 import { ProjectProgressComponent } from '../shared/project-progress.component';
 import { ProjectTimelineComponent } from '../shared/project-timeline.component';
@@ -25,6 +26,7 @@ import {
 @Component({
   selector: 'project-schedule-container',
   imports: [
+    ProjectActionPlanComponent,
     ProjectProgressComponent,
     DateBadgeComponent,
     FormsModule,
@@ -71,7 +73,7 @@ export class ProjectScheduleContainerComponent {
     });
     effect((onCleanup) => {
       const project = this.store.project();
-      if (!project) return;
+      if (!project || project.nature === '5W2H') return;
       const sub = this.store.api.phases(project.id).subscribe({
         next: (phases) => {
           this.phases.set(phases);

@@ -1,0 +1,13 @@
+.action-plan-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr) 260px; gap: 16px; align-items: start; }
+.action-plan-filter { padding: 12px; }
+.action-plan-actions, .action-plan-reviews { min-width: 0; }
+.action-plan-timeline { display: grid; gap: 18px; padding-left: 16px; border-left: 2px solid #cbd5e1; }
+@media (max-width: 1199px) {
+  .action-plan-layout { grid-template-columns: 200px minmax(0, 1fr); }
+  .action-plan-reviews { grid-column: 2; }
+}
+@media (max-width: 767px) {
+  .action-plan-layout { grid-template-columns: minmax(0, 1fr); }
+  .action-plan-reviews { grid-column: auto; }
+  .action-plan-timeline { padding-left: 10px; }
+}

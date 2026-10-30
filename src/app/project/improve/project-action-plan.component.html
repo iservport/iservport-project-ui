@@ -1,0 +1,61 @@
+<main class="project-page">
+  <section class="project-panel p-3 mb-3">
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+      <h2 class="h5 me-auto mb-0">{{ 'PROJECT_5W2H' | i18n }}</h2>
+      @if (store.canEdit()) {
+        <button type="button" class="btn btn-outline-primary" [disabled]="saving()" (click)="createPhase()">{{ 'PROJECT_5W2H_NEW_AREA' | i18n }}</button>
+        <button type="button" class="btn btn-outline-secondary" [disabled]="!selectedPhase() || saving()" (click)="editPhase()">{{ 'PROJECT_5W2H_EDIT_AREA' | i18n }}</button>
+        <button type="button" class="btn btn-primary" [disabled]="!selectedPhase() || saving()" (click)="createReport()">{{ 'PROJECT_5W2H_NEW_ACTION' | i18n }}</button>
+      }
+    </div>
+  </section>
+  <div class="action-plan-layout">
+    <aside class="project-panel action-plan-filter" [attr.aria-label]="'PROJECT_5W2H' | i18n">
+      <custom-filter-container [filter]="filter()" [disabled]="loading()" (filterChange)="updateFilter($event)" />
+    </aside>
+    <section class="action-plan-actions" [attr.aria-label]="'PROJECT_ACTIVITIES' | i18n">
+      <div class="project-panel p-3 mb-3">
+        <custom-search-bar [filter]="filter()" [placeholder]="'PROJECT_5W2H_SEARCH' | i18n" (filterChange)="search($event)" />
+        <div class="d-flex gap-2 justify-content-between align-items-center flex-wrap mt-2">
+          <span class="small text-secondary">{{ page().totalElements }} {{ 'PROJECT_RESULTS' | i18n }}</span>
+          <custom-pagination [page]="page()" [alwaysShow]="false" (change)="load($event)" />
+        </div>
+      </div>
+      @if (error()) {
+        <div class="alert alert-danger" role="alert">{{ error() | i18n }}</div>
+      }
+      @if (loading()) {
+        <p role="status">{{ 'PROJECT_LOADING' | i18n }}</p>
+      } @else {
+        <div class="action-plan-timeline">
+          @for (report of page().content; track report.id) {
+            <project-action-card [report]="report" [canEdit]="store.canEdit()" (edit)="editReport($event)" />
+          } @empty { <p class="text-secondary">{{ 'PROJECT_EMPTY' | i18n }}</p> }
+        </div>
+      }
+    </section>
+    <aside class="project-panel p-3 action-plan-reviews" [attr.aria-label]="'PROJECT_MONITORING' | i18n">
+      <h2 class="h5">{{ 'PROJECT_MONITORING' | i18n }}</h2>
+      <custom-pagination [page]="reviews()" [alwaysShow]="false" (change)="loadReviews($event)" />
+      @if (reviewsError()) { <p class="alert alert-danger" role="alert">{{ reviewsError() | i18n }}</p> }
+      @if (reviewsLoading()) {
+        <p role="status">{{ 'PROJECT_LOADING' | i18n }}</p>
+      } @else {
+        @for (review of reviews().content; track review.id) {
+          <article class="border-bottom py-3">
+            <span class="date-badge-inline"><date-badge [date]="review.issueDate" dateMode="calendar" resolution="I" /></span>
+            <h3 class="h6 mt-2"><a [routerLink]="['/id', review.reportId]">{{ review.reportSummary || review.reportCode }}</a></h3>
+            @if (review.ownerId) { <custom-identity-avatar [identityId]="review.ownerId" size="24" /> }
+            <div class="project-prose mt-2" [innerHTML]="review.reviewSummary"></div>
+            <span class="badge text-bg-light mt-2">{{ review.complete }}%</span>
+          </article>
+        } @empty { <p class="text-secondary mt-3">{{ 'PROJECT_NO_REVIEWS' | i18n }}</p> }
+      }
+    </aside>
+  </div>
+</main>
+@if (editor(); as value) {
+  <project-editor [value]="value" [fields]="editorType() === 'phase' ? phaseFields : reportFields()"
+    [title]="editorType() === 'phase' ? 'PROJECT_5W2H_WHERE' : 'PROJECT_5W2H_WHAT'"
+    [busy]="saving()" [error]="saveError()" (save)="save($event)" (cancel)="close()" />
+}

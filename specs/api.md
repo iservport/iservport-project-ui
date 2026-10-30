@@ -17,6 +17,7 @@ The configured `app-project` backend paths were stale. The implemented module li
 | Activities       | `/app/report/list`             | GET `reportPhaseId`; complete phase list, filtered and paginated locally                             |
 | Activity         | `/app/report`                  | GET `id`; PUT full entity; POST `/NATURE_WORKLOAD` with full phase                                   |
 | Reviews          | `/app/report/review/list`      | GET `reportId`; POST `/app/report/review?reportId`; PUT full review                                  |
+| Project reviews  | `/app/report/review/all`       | GET `projectId,pageNumber`; independently paginated 5W2H follow-ups                                |
 | Team             | `/app/report/team/list`        | GET `projectId`; POST `/app/report/team?folderId&userId`; PUT full member; DELETE `id`               |
 | Content links    | `/app/content/task/report`     | GET `reportId`; POST `/app/content/task?reportId` then PUT with `contentId`; DELETE `id,reportId`    |
 | Templates        | `/app/custom/template/filter`  | POST filter (`workspace,categoryId,search,priorities`) and one-based `pageNumber`                    |

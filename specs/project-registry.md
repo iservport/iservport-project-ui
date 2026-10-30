@@ -42,3 +42,14 @@ P1's backend `ProjectFilter` includes `hideUiChoice`. Project list requests carr
 ## Team messages
 
 p7 includes message history, draft editing, team recipient selection, saving, and an explicit send action. Message delivery is never exercised by automated verification.
+
+## 5W2H action plans
+
+Projects with `nature: '5W2H'` use the dedicated action-plan layout on p3 instead of the ordinary phase timeline and Kanban board. This follows the legacy `app-plan/src/main/resources/assets/report/template/improve/` container, timeline, activity detail, and forms.
+
+- The shared record shell provides action-plan and team navigation. Legacy `/improve/:projectId` and `/improve/id/:reportId` paths redirect to p3 and p4 respectively.
+- The plan has three columns: shared area/status/team/priority/order filters, paginated action cards, and independently paginated project follow-ups. On narrow screens the columns stack.
+- Cards preserve the legacy four-column grouping: What/When (`taskDesc`, schedule/check dates), Why (`taskCause`), Where/Who (phase and `reporterId`), and How/How much (`taskDetail`). The legacy backend stores How and How much together; no separate cost field is introduced.
+- Activity detail displays the same fields vertically beside follow-ups. Editors include the corresponding rich text, area, identity, and date fields while preserving the full entity and optimistic-lock version.
+- Assignees and follow-up authors use the shared `CustomIdentityAvatarComponent` (`custom-identity-avatar`) with 24px avatars.
+- Labels use local translations in all four supported languages. Ordinary project and activity layouts retain their existing behavior.

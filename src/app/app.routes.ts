@@ -15,6 +15,8 @@ export const routes: Routes = [
   },
   ...projectTemplateRoutes,
   ...projectRoutes,
+  { path: 'improve/id/:reportId', redirectTo: 'id/:reportId' },
+  { path: 'improve/:projectId', redirectTo: 'schedule/:projectId' },
   { path: 'light/:projectId', redirectTo: 'schedule/:projectId' },
   { path: 'report/:reportId', redirectTo: 'id/:reportId' },
   { path: ':projectId', redirectTo: 'project/:projectId' },

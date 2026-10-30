@@ -1,0 +1,40 @@
+@let action = report();
+<article class="project-panel action-card">
+  <header class="action-card-header">
+    <div class="action-card-dates">
+      <div><span class="small text-secondary">{{ 'PROJECT_START' | i18n }}</span>
+        <span class="date-badge-inline"><date-badge [date]="action.scheduledStartDate" dateMode="calendar" resolution="I" /></span>
+      </div>
+      <div><span class="small text-secondary">{{ 'PROJECT_END' | i18n }}</span>
+        <span class="date-badge-inline"><date-badge [date]="action.scheduledEndDate" dateMode="calendar" [resolution]="action.resolution" /></span>
+      </div>
+    </div>
+    <div class="action-card-title">
+      <span class="small text-secondary">{{ action.reportCode }}</span>
+      <h3 class="h6 mb-1"><a [routerLink]="['/id', action.id]">{{ action.summary || action.reportCode }}</a></h3>
+      <span class="small text-secondary">{{ statusLabel(action.resolution) | i18n }} · {{ action.complete }}%</span>
+    </div>
+    @if (canEdit()) {
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="edit.emit(action.id)">{{ 'PROJECT_EDIT' | i18n }}</button>
+    }
+  </header>
+  <dl class="action-card-fields" [class.action-card-fields-vertical]="vertical()">
+    <div>
+      <dt>{{ 'PROJECT_5W2H_WHAT' | i18n }} / {{ 'PROJECT_5W2H_WHEN' | i18n }}</dt>
+      <dd><div class="project-prose" [innerHTML]="action.taskDesc"></div>
+        @if (action.nextCheckDate) {
+          <span class="small text-secondary d-block mt-2">{{ 'PROJECT_5W2H_CHECK' | i18n }}</span>
+          <span class="date-badge-inline"><date-badge [date]="action.nextCheckDate" dateMode="calendar" [resolution]="action.resolution" /></span>
+        }
+      </dd>
+    </div>
+    <div><dt>{{ 'PROJECT_5W2H_WHY' | i18n }}</dt><dd class="project-prose" [innerHTML]="action.taskCause"></dd></div>
+    <div>
+      <dt>{{ 'PROJECT_5W2H_WHERE' | i18n }} / {{ 'PROJECT_5W2H_WHO' | i18n }}</dt>
+      <dd>{{ action.phaseName }}
+        @if (action.reporterId) { <custom-identity-avatar class="d-block mt-2" [identityId]="action.reporterId" size="24" /> }
+      </dd>
+    </div>
+    <div><dt>{{ 'PROJECT_5W2H_HOW' | i18n }} / {{ 'PROJECT_5W2H_HOW_MUCH' | i18n }}</dt><dd class="project-prose" [innerHTML]="action.taskDetail"></dd></div>
+  </dl>
+</article>

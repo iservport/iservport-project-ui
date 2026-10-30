@@ -1,5 +1,6 @@
 import type { Observable } from 'rxjs';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import {
   CustomStatsComponent,
   CustomContainerShellComponent,
@@ -11,7 +12,8 @@ import {
 import { ProjectWorkspaceStore } from './project-workspace.store';
 import { ProjectEditorComponent } from './project-editor.component';
 import { projectFields, reportFields, templateFields, statusLabel } from './project-fields';
-import type { Entity, Project, Report, ProjectTemplate } from '../../api/project/project.model';
+import type { Entity, Phase, Project, Report, ProjectTemplate, TeamMember } from '../../api/project/project.model';
+import { actionPlanReportFields } from '../improve/project-action-plan.config';
 @Component({
   selector: 'project-shell',
   imports: [
@@ -22,65 +24,7 @@ import type { Entity, Project, Report, ProjectTemplate } from '../../api/project
     ProjectEditorComponent,
   ],
   providers: [ProjectWorkspaceStore],
-  template: `
-    <custom-container-shell class="project-record-shell"
-      [breadcrumbs]="breadcrumbs()"
-      [navigation]="navigation()"
-      [breadcrumbCanEdit]="!!record() && store.canEdit()"
-      breadcrumbEditLabel="PROJECT_EDIT"
-      (breadcrumbEdit)="edit()"
-      [ariaLabel]="'PROJECTS' | i18n"
-    >
-      <section customContainerHeader class="project-header">
-        @if (store.loading()) {
-          <p role="status">{{ 'PROJECT_LOADING' | i18n }}</p>
-        }
-        @if (store.error()) {
-          <div class="alert alert-danger" role="alert">{{ store.error() | i18n }}</div>
-        }
-        @if (store.project(); as project) {
-          <div class="project-header-row">
-            <div class="project-header-main">
-              <h1>{{ project.folderName }}</h1>
-              <div class="d-flex gap-3 flex-wrap text-secondary small mt-2">
-                <span>{{ project.patternPrefix || project.folderCode }}</span>
-                <span>{{ statusLabel(project.resolution) | i18n }}</span>
-                @if (store.stats(); as stats) { <custom-stats [stats]="stats" /> }
-              </div>
-            </div>
-            <div class="project-header-dates">
-              <div><span class="project-date-label">{{ 'PROJECT_START' | i18n }}</span>
-                <span class="date-badge-inline date-badge-large"><date-badge [date]="project.startDate" dateMode="calendar" resolution="I" /></span>
-              </div>
-              <div><span class="project-date-label">{{ 'PROJECT_END' | i18n }}</span>
-                <span class="date-badge-inline date-badge-large"><date-badge [date]="project.endDate" dateMode="calendar" [resolution]="project.resolution" /></span>
-              </div>
-            </div>
-          </div>
-          @if (store.statsError()) {
-            <p class="text-secondary" role="status">{{ 'PROJECT_STATS_ERROR' | i18n }}</p>
-          }
-        }
-        @if (store.report(); as report) {
-          <h2 class="h5 mt-3">{{ report.reportCode }} · {{ report.summary }}</h2>
-        }
-        @if (store.template(); as template) {
-          <h1>{{ template.templateName }}</h1>
-          <span class="text-secondary">{{ template.templateCode }}</span>
-        }
-      </section>
-    </custom-container-shell>
-    @if (editor(); as value) {
-      <project-editor
-        [value]="value"
-        [fields]="fields()"
-        [busy]="saving()"
-        [error]="error()"
-        (save)="save($event)"
-        (cancel)="editor.set(null)"
-      />
-    }
-  `,
+  templateUrl: './project-shell.component.html',
 })
 export class ProjectShellComponent {
   readonly store = inject(ProjectWorkspaceStore);
@@ -88,11 +32,28 @@ export class ProjectShellComponent {
   readonly editor = signal<Entity | null>(null);
   readonly saving = signal(false);
   readonly error = signal('');
+  private readonly actionPhases = signal<Phase[]>([]);
+  private readonly actionTeam = signal<TeamMember[]>([]);
+  constructor() {
+    effect((onCleanup) => {
+      const project = this.store.project();
+      if (project?.nature !== '5W2H' || !this.store.report()) return;
+      const request = forkJoin({ phases: this.store.api.phases(project.id), team: this.store.api.team(project.id) }).subscribe({
+        next: ({ phases, team }) => { this.actionPhases.set(phases); this.actionTeam.set(team); },
+        error: () => this.error.set('PROJECT_LOAD_ERROR'),
+      });
+      onCleanup(() => request.unsubscribe());
+    });
+  }
   readonly record = computed(
     () => this.store.template() || this.store.report() || this.store.project(),
   );
   readonly fields = computed(() =>
-    this.store.template() ? templateFields : this.store.report() ? reportFields : projectFields,
+    this.store.template() ? templateFields : this.store.report()
+      ? this.store.project()?.nature === '5W2H'
+        ? actionPlanReportFields(this.actionPhases(), this.actionTeam(), this.store.report()!)
+        : reportFields
+      : projectFields,
   );
   readonly breadcrumbs = computed<CustomBreadcrumbItem[]>(() => {
     const p = this.store.project(),
@@ -110,7 +71,7 @@ export class ProjectShellComponent {
             {
               key: 'project',
               label: p.patternPrefix || p.folderCode,
-              route: ['/project', p.id],
+              route: [p.nature === '5W2H' ? '/schedule' : '/project', p.id],
               translate: false,
             },
           ]
@@ -122,6 +83,14 @@ export class ProjectShellComponent {
     const p = this.store.project(),
       r = this.store.report();
     if (!p) return [];
+    if (p.nature === '5W2H') return [
+      { key: 'schedule', label: 'PROJECT_5W2H', route: ['/schedule', p.id] },
+      ...(r ? [
+        { key: 'monitor', label: 'PROJECT_MONITORING', route: ['/id', r.id] },
+        { key: 'content', label: 'PROJECT_CONTENT', route: ['/content', r.id] },
+      ] : []),
+      { key: 'team', label: 'PROJECT_5W2H_WHO', route: ['/team', p.id] },
+    ];
     return [
       { key: 'summary', label: 'PROJECT_SUMMARY', route: ['/project', p.id] },
       { key: 'schedule', label: 'PROJECT_ACTIVITIES', route: ['/schedule', p.id] },

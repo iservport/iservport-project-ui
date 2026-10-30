@@ -1,0 +1,75 @@
+@if (store.report(); as report) {
+      <main class="project-page" [class.action-detail-layout]="store.project()?.nature === '5W2H'">
+        @if (store.project()?.nature === '5W2H') {
+          <project-action-card [report]="actionReport()!" [vertical]="true" />
+        } @else {
+        <section class="project-panel p-4">
+          <h2 class="h5">{{ 'PROJECT_DESCRIPTION' | i18n }}</h2>
+          <div class="project-prose" [innerHTML]="report.taskDesc"></div>
+          <p class="small text-secondary mt-3 mb-1">
+            {{ 'PROJECT_COMPLETE' | i18n }}: {{ report.complete }}%
+          </p>
+          <div
+            class="progress board-card__progress"
+            role="progressbar"
+            [attr.aria-label]="'PROJECT_COMPLETE' | i18n"
+            [attr.aria-valuenow]="report.complete"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <div
+              class="progress-bar"
+              [class.bg-success]="report.complete === 100"
+              [class.bg-primary]="report.complete !== 100"
+              [style.width.%]="report.complete"
+            ></div>
+          </div>
+        </section>
+        }
+        <section class="project-panel p-4" [class.mt-3]="store.project()?.nature !== '5W2H'">
+          <div class="d-flex justify-content-between align-items-center">
+            <h2 class="h5">{{ 'PROJECT_MONITORING' | i18n }}</h2>
+            @if (store.canEdit()) {
+              <button class="btn btn-primary" [disabled]="saving()" (click)="create()">
+                {{ 'PROJECT_NEW_REVIEW' | i18n }}
+              </button>
+            }
+          </div>
+          @if (error()) {
+            <div class="alert alert-danger mt-3">{{ error() | i18n }}</div>
+          }
+          @for (review of reviews(); track review.id) {
+            <article class="border-bottom py-3">
+              <div class="d-flex gap-3 justify-content-between">
+                <h3 class="h6">{{ review.reviewSummary }}</h3>
+                <span class="text-secondary small">{{
+                  review.issueDate | date: 'dd/MM/yyyy'
+                }}</span>
+              </div>
+              @if (review.ownerId) { <custom-identity-avatar class="d-block mb-2" [identityId]="review.ownerId" size="24" /> }
+              <div class="project-prose" [innerHTML]="review.reviewText"></div>
+              <div class="d-flex justify-content-between mt-2">
+                <span class="badge text-bg-light">{{ review.complete }}%</span>
+                @if (store.canEdit()) {
+                  <button class="btn btn-outline-secondary btn-sm" (click)="edit(review)">
+                    {{ 'PROJECT_EDIT' | i18n }}
+                  </button>
+                }
+              </div>
+            </article>
+          } @empty {
+            <p class="text-secondary mt-3">{{ 'PROJECT_NO_REVIEWS' | i18n }}</p>
+          }
+        </section>
+      </main>
+    }
+    @if (editor(); as value) {
+      <project-editor
+        [value]="value"
+        [fields]="fields"
+        [busy]="saving()"
+        [error]="saveError()"
+        (save)="save($event)"
+        (cancel)="editor.set(null); load()"
+      />
+    }

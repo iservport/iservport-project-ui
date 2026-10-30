@@ -41,6 +41,10 @@ export interface Report extends Entity {
   reportCode: string;
   summary: string;
   taskDesc?: string;
+  taskCause?: string;
+  taskDetail?: string;
+  phaseName?: string;
+  nextCheckDate?: string | number;
   resolution: string;
   complete: number;
   priority: string;
@@ -50,6 +54,9 @@ export interface Report extends Entity {
 }
 export interface Review extends Entity {
   reportId: number;
+  reportSummary?: string;
+  reportCode?: string;
+  ownerId?: number;
   reviewSummary: string;
   reviewText: string;
   reviewType: string;
