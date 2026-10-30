@@ -28,5 +28,35 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
+  },
+  "/report": {
+    "target": "https://0.0.0.0:8443",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/assets": {
+    "target": "https://0.0.0.0:8443",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/static": {
+    "target": "https://0.0.0.0:8443",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/component": {
+    "target": "https://0.0.0.0:8443",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/webjars": {
+    "target": "https://0.0.0.0:8443",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
   }
 }

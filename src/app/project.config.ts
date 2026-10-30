@@ -20,11 +20,16 @@ export function projectTopNavigationWithout(section: string) {
     sections: PROJECT_TOP_MENU_CONFIG.sections.filter((item) => item !== section),
   };
 }
-export function projectFilter(): FilterContainerModel {
+export interface ProjectHomeFilter extends FilterContainerModel {
+  hideUiChoice: boolean;
+}
+
+export function projectFilter(): ProjectHomeFilter {
   return {
     workspace: 'PROJECT',
     preferenceType: 'PROJECT_HOME_FILTER',
     preferenceKey: '0',
+    hideUiChoice: false,
     search: '',
     hideSearch: true,
     sections: [
@@ -65,6 +70,7 @@ export function backendFilter(filter: FilterContainerModel): Record<string, unkn
   return {
     search: filter.search || '',
     preferenceType: filter.preferenceType,
+    hideUiChoice: filter['hideUiChoice'] === true,
     pageSize: 24,
     ...Object.fromEntries(
       filter.sections.map((section) => [section.key, { checked: section.checked }]),

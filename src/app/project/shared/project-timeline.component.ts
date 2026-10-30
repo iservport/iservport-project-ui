@@ -1,88 +1,87 @@
-import { Component, input, computed } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { Component, input, output, computed } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { I18nPipe } from '@iservport/iservport-angular-ui';
-import type { Phase } from '../../api/project/project.model';
+import { DateBadgeComponent, I18nPipe } from '@iservport/iservport-angular-ui';
+import type { Phase, ProjectStats } from '../../api/project/project.model';
+import { ProjectProgressComponent } from './project-progress.component';
+
 @Component({
   selector: 'project-timeline',
-  imports: [I18nPipe, DatePipe, RouterLink],
-  template: ` <div class="table-responsive">
-    <table class="table align-middle mb-0">
-      <caption class="visually-hidden">
-        {{
-          'PROJECT_SCHEDULE' | i18n
-        }}
-      </caption>
-      <thead>
-        <tr>
-          <th>{{ 'PROJECT_PHASE' | i18n }}</th>
-          <th>{{ 'PROJECT_START' | i18n }}</th>
-          <th>{{ 'PROJECT_END' | i18n }}</th>
-          <th class="w-25">{{ 'PROJECT_SCHEDULE' | i18n }}</th>
-        </tr>
-      </thead>
-      <tbody>
+  imports: [NgTemplateOutlet, I18nPipe, DateBadgeComponent, RouterLink, ProjectProgressComponent],
+  template: `
+    <section class="project-phases" [attr.aria-label]="'PROJECT_SCHEDULE' | i18n">
+      <div class="project-phase-columns small text-secondary" aria-hidden="true">
+        <span>{{ 'PROJECT_PHASE' | i18n }}</span>
+        <span>{{ 'PROJECT_START' | i18n }}</span>
+        <span>{{ 'PROJECT_END' | i18n }}</span>
+        <span>{{ 'PROJECT_SCHEDULE' | i18n }}</span>
+      </div>
+      <ul class="list-unstyled m-0">
         @for (phase of phases(); track phase.id) {
-          <tr>
-            <td>
-              <a [routerLink]="['/schedule', projectId()]" [queryParams]="{ phaseId: phase.id }"
-                >{{ phase.literal }} · {{ phase.phaseName }}</a
-              >
-            </td>
-            <td>{{ phase.scheduledStartDate | date: 'dd/MM/yyyy' }}</td>
-            <td>{{ phase.scheduledEndDate | date: 'dd/MM/yyyy' }}</td>
-            <td>
-              <div class="bg-body-tertiary rounded" style="height:12px">
-                <div
-                  class="bg-primary rounded"
-                  style="height:12px"
-                  [style.margin-left.%]="offset(phase)"
-                  [style.width.%]="width(phase)"
-                ></div>
-              </div>
-            </td>
-          </tr>
+          <li>
+            @if (selectable()) {
+              <button type="button" class="project-phase-row"
+                [class.project-phase-row--selected]="selectedId() === phase.id"
+                [attr.aria-pressed]="selectedId() === phase.id"
+                (click)="phaseSelect.emit(phase.id)">
+                <ng-container [ngTemplateOutlet]="row" [ngTemplateOutletContext]="{ $implicit: phase }" />
+              </button>
+            } @else {
+              <a class="project-phase-row" [routerLink]="['/schedule', projectId()]"
+                [queryParams]="{ phaseId: phase.id }">
+                <ng-container [ngTemplateOutlet]="row" [ngTemplateOutletContext]="{ $implicit: phase }" />
+              </a>
+            }
+          </li>
         } @empty {
-          <tr>
-            <td colspan="4" class="text-secondary">{{ 'PROJECT_NO_PHASES' | i18n }}</td>
-          </tr>
+          <li class="text-secondary py-2">{{ 'PROJECT_NO_PHASES' | i18n }}</li>
         }
-      </tbody>
-    </table>
-  </div>`,
+      </ul>
+      <ng-template #row let-phase>
+        <span class="project-phase-title">
+          <span class="project-phase-chevron" aria-hidden="true">{{ selectedId() === phase.id ? '▾' : '▸' }}</span>
+          <span>{{ phase.literal }} · {{ phase.phaseName }}</span>
+        </span>
+        <span class="date-badge-inline"><span class="visually-hidden">{{ 'PROJECT_START' | i18n }}</span>
+          <date-badge [date]="phase.scheduledStartDate" dateMode="calendar" resolution="I" />
+        </span>
+        <span class="date-badge-inline"><span class="visually-hidden">{{ 'PROJECT_END' | i18n }}</span>
+          <date-badge [date]="phase.scheduledEndDate" dateMode="calendar" [resolution]="phase.resolution" />
+        </span>
+        <span class="project-phase-visuals">
+          <span class="project-phase-range" [attr.aria-label]="'PROJECT_SCHEDULE' | i18n">
+            <span class="bg-primary" [style.margin-left.%]="offset(phase)" [style.width.%]="width(phase)"></span>
+          </span>
+          @if (stats()[phase.id]; as phaseStats) { <project-progress [progress]="phaseStats.progress" /> }
+        </span>
+      </ng-template>
+    </section>
+  `,
 })
 export class ProjectTimelineComponent {
   readonly phases = input<Phase[]>([]);
   readonly projectId = input(0);
+  readonly selectable = input(false);
+  readonly selectedId = input(0);
+  readonly stats = input<Record<number, ProjectStats>>({});
+  readonly phaseSelect = output<number>();
   private readonly bounds = computed(() => {
     const values = this.phases()
       .flatMap((p) => [this.time(p.scheduledStartDate), this.time(p.scheduledEndDate)])
       .filter((v) => v > 0);
-    return { start: Math.min(...values), end: Math.max(...values) };
+    return values.length ? { start: Math.min(...values), end: Math.max(...values) } : { start: 0, end: 0 };
   });
   private time(value: string | number | undefined) {
-    return value ? new Date(value).getTime() : 0;
+    const time = value ? new Date(value).getTime() : 0;
+    return Number.isFinite(time) ? time : 0;
   }
   offset(p: Phase) {
-    const b = this.bounds();
-    return Math.max(
-      0,
-      Math.min(
-        98,
-        ((this.time(p.scheduledStartDate) - b.start) / Math.max(1, b.end - b.start)) * 100,
-      ),
-    );
+    const b = this.bounds(), start = this.time(p.scheduledStartDate);
+    return start && b.end > b.start ? Math.max(0, Math.min(98, ((start - b.start) / (b.end - b.start)) * 100)) : 0;
   }
   width(p: Phase) {
-    const b = this.bounds();
-    return Math.max(
-      2,
-      Math.min(
-        100 - this.offset(p),
-        ((this.time(p.scheduledEndDate) - this.time(p.scheduledStartDate)) /
-          Math.max(1, b.end - b.start)) *
-          100,
-      ),
-    );
+    const b = this.bounds(), start = this.time(p.scheduledStartDate), end = this.time(p.scheduledEndDate);
+    if (!start || !end || end < start) return 0;
+    return Math.max(2, Math.min(100 - this.offset(p), ((end - start) / Math.max(1, b.end - b.start)) * 100));
   }
 }

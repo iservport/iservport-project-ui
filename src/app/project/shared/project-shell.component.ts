@@ -1,10 +1,9 @@
-import { ProjectProgressComponent } from './project-progress.component';
 import type { Observable } from 'rxjs';
 import { Component, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import {
   CustomStatsComponent,
   CustomContainerShellComponent,
+  DateBadgeComponent,
   I18nPipe,
   type CustomBreadcrumbItem,
   type CustomNavItem,
@@ -16,16 +15,15 @@ import type { Entity, Project, Report, ProjectTemplate } from '../../api/project
 @Component({
   selector: 'project-shell',
   imports: [
-    ProjectProgressComponent,
     CustomStatsComponent,
     CustomContainerShellComponent,
     I18nPipe,
-    DatePipe,
+    DateBadgeComponent,
     ProjectEditorComponent,
   ],
   providers: [ProjectWorkspaceStore],
   template: `
-    <custom-container-shell
+    <custom-container-shell class="project-record-shell"
       [breadcrumbs]="breadcrumbs()"
       [navigation]="navigation()"
       [breadcrumbCanEdit]="!!record() && store.canEdit()"
@@ -41,22 +39,27 @@ import type { Entity, Project, Report, ProjectTemplate } from '../../api/project
           <div class="alert alert-danger" role="alert">{{ store.error() | i18n }}</div>
         }
         @if (store.project(); as project) {
-          <h1>{{ project.folderName }}</h1>
-          @if (store.stats(); as stats) {
-            <div class="my-3">
-              <project-progress [progress]="stats.progress" />
-              <div class="mt-2"><custom-stats [stats]="stats" /></div>
+          <div class="project-header-row">
+            <div class="project-header-main">
+              <h1>{{ project.folderName }}</h1>
+              <div class="d-flex gap-3 flex-wrap text-secondary small mt-2">
+                <span>{{ project.patternPrefix || project.folderCode }}</span>
+                <span>{{ statusLabel(project.resolution) | i18n }}</span>
+                @if (store.stats(); as stats) { <custom-stats [stats]="stats" /> }
+              </div>
             </div>
-          }
+            <div class="project-header-dates">
+              <div><span class="project-date-label">{{ 'PROJECT_START' | i18n }}</span>
+                <span class="date-badge-inline date-badge-large"><date-badge [date]="project.startDate" dateMode="calendar" resolution="I" /></span>
+              </div>
+              <div><span class="project-date-label">{{ 'PROJECT_END' | i18n }}</span>
+                <span class="date-badge-inline date-badge-large"><date-badge [date]="project.endDate" dateMode="calendar" [resolution]="project.resolution" /></span>
+              </div>
+            </div>
+          </div>
           @if (store.statsError()) {
             <p class="text-secondary" role="status">{{ 'PROJECT_STATS_ERROR' | i18n }}</p>
           }
-          <div class="d-flex gap-3 flex-wrap text-secondary small">
-            <span>{{ project.patternPrefix || project.folderCode }}</span
-            ><span>{{ statusLabel(project.resolution) | i18n }}</span
-            ><span>{{ 'PROJECT_START' | i18n }}: {{ project.startDate | date: 'dd/MM/yyyy' }}</span
-            ><span>{{ 'PROJECT_END' | i18n }}: {{ project.endDate | date: 'dd/MM/yyyy' }}</span>
-          </div>
         }
         @if (store.report(); as report) {
           <h2 class="h5 mt-3">{{ report.reportCode }} · {{ report.summary }}</h2>

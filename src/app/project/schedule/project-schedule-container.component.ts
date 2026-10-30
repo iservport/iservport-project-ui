@@ -1,11 +1,10 @@
 import type { Observable } from 'rxjs';
 import { Component, inject, signal, effect } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import {
-  CustomStatsComponent,
+  DateBadgeComponent,
   CustomPaginationComponent,
   CustomSearchBarComponent,
   I18nPipe,
@@ -27,22 +26,23 @@ import {
   selector: 'project-schedule-container',
   imports: [
     ProjectProgressComponent,
-    DatePipe,
+    DateBadgeComponent,
     FormsModule,
     RouterLink,
     I18nPipe,
-    CustomStatsComponent,
     CustomPaginationComponent,
     CustomSearchBarComponent,
     ProjectTimelineComponent,
     ProjectEditorComponent,
   ],
   templateUrl: './project-schedule-container.component.html',
+  styleUrl: './project-schedule-container.component.css',
 })
 export class ProjectScheduleContainerComponent {
   readonly store = inject(ProjectWorkspaceStore);
   private readonly i18n = inject(I18nLookupService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   readonly phases = signal<Phase[]>([]);
   readonly stats = signal<Record<number, ProjectStats>>({});
   readonly statsError = signal(false);
@@ -144,8 +144,12 @@ export class ProjectScheduleContainerComponent {
     });
   }
   select(id: number) {
-    this.selected.set(Number(id));
-    this.load();
+    if (!this.phases().some((phase) => phase.id === id)) return;
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { phaseId: id },
+      queryParamsHandling: 'merge',
+    });
   }
   currentPhase() {
     return this.phases().find((p) => p.id === this.selected());

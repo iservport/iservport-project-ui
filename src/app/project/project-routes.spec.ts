@@ -41,5 +41,7 @@ describe('Project navigation contract', () => {
       pageSize: 24,
     });
     expect(backendFilter(filter)).not.toHaveProperty('sections');
+    filter.hideUiChoice = true;
+    expect(backendFilter(filter)).toHaveProperty('hideUiChoice', true);
   });
 });

@@ -26,7 +26,8 @@ export class ProjectHomeStore {
     return !!(a?.manager || a?.folder || a?.write || a?.writer);
   });
   readonly templates = !!inject(ActivatedRoute).snapshot.data['templates'];
-  readonly filter = signal<FilterContainerModel>(projectFilter());
+  readonly filter = signal(projectFilter());
+  readonly uiChoiceReady = signal(false);
   readonly categories = signal<Category[]>([]);
   readonly page = signal<Page<Project | ProjectTemplate>>(emptyPage());
   readonly loading = signal(true);
@@ -38,7 +39,21 @@ export class ProjectHomeStore {
   readonly saveError = signal('');
   readonly fields = this.templates ? templateFields : projectFields;
   private readonly requests = new Subject<number>();
+  private categoriesReady = false;
   constructor() {
+    if (!this.templates)
+      this.api
+        .homeFilterPreference()
+        .pipe(
+          map((preference) => JSON.parse(preference?.content || '{}')?.hideUiChoice === true),
+          catchError(() => of(false)),
+          takeUntilDestroyed(),
+        )
+        .subscribe((hideUiChoice) => {
+          this.filter.update((f) => ({ ...f, hideUiChoice }));
+          this.uiChoiceReady.set(true);
+          if (this.categoriesReady) this.load();
+        });
     if (this.templates)
       this.filter.update((f) => ({
         ...f,
@@ -104,7 +119,13 @@ export class ProjectHomeStore {
               ...f,
               sections: f.sections.map((s) =>
                 s.key === 'categories'
-                  ? { ...s, badgeMap: Object.fromEntries(stats.map((row) => [row.id, row.total])) }
+                  ? {
+                      ...s,
+                      // Match the legacy category filter's attention count, not all report rows.
+                      badgeMap: Object.fromEntries(
+                        stats.map((row) => [String(row.id), Math.max(row.alert || 0, row.overdue || 0)]),
+                      ),
+                    }
                   : s,
               ),
             })),
@@ -128,6 +149,7 @@ export class ProjectHomeStore {
                 : s,
             ),
           }));
+          this.categoriesReady = true;
           this.load();
         },
         error: () => {
@@ -140,11 +162,19 @@ export class ProjectHomeStore {
     return Number(this.filter().sections.find((s) => s.key === 'categories')?.checked[0] || 0);
   }
   load(page = 0) {
+    // Project searches auto-persist the filter; restore dismissal before the first search.
+    if (!this.templates && !this.uiChoiceReady()) return;
     this.requests.next(page);
   }
   updateFilter(filter: FilterContainerModel) {
-    this.filter.set(filter);
+    this.filter.set({ ...filter, hideUiChoice: this.filter().hideUiChoice });
     this.load();
+  }
+  hideUiChoice() {
+    const filter = { ...this.filter(), hideUiChoice: true };
+    return this.api.saveHomeFilterPreference(filter).pipe(
+      tap(() => this.filter.update((f) => ({ ...f, hideUiChoice: true }))),
+    );
   }
   create() {
     if (!this.categoryId() || this.saving()) return;

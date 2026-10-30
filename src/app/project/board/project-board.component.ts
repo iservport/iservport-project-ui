@@ -1,12 +1,12 @@
 import { ProjectProgressComponent } from '../shared/project-progress.component';
 import { Component, inject } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
   CustomStatsComponent,
   CustomTopBoardNavigationComponent,
   CustomPaginationComponent,
   CustomSearchBarComponent,
+  DateBadgeComponent,
   I18nPipe,
 } from '@iservport/iservport-angular-ui';
 import { ProjectHomeStore } from '../home/project-home.store';
@@ -19,7 +19,7 @@ import type { Project, ProjectTemplate } from '../../api/project/project.model';
   imports: [
     ProjectProgressComponent,
     RouterLink,
-    DatePipe,
+    DateBadgeComponent,
     CustomStatsComponent,
     CustomTopBoardNavigationComponent,
     CustomPaginationComponent,
@@ -43,7 +43,13 @@ export class ProjectBoardComponent {
   date(item: Project | ProjectTemplate) {
     return item['endDate'] as string | number | undefined;
   }
+  startDate(item: Project | ProjectTemplate) {
+    return item['startDate'] as string | number | undefined;
+  }
+  resolution(item: Project | ProjectTemplate) {
+    return item['resolution'] as string | undefined;
+  }
   status(item: Project | ProjectTemplate) {
-    return statusLabel(item['resolution'] as string | undefined);
+    return statusLabel(this.resolution(item));
   }
 }

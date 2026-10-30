@@ -116,3 +116,140 @@ textarea {
   border-radius: 999px;
   background: #eef2f6;
 }
+
+/* Board-only presentation for the shared progress and legacy stats markup. */
+.project-home-board project-progress .board-card__progress {
+  height: 4px;
+  border-radius: 0;
+}
+.project-home-board project-progress .bg-success {
+  background-color: #9abd85 !important;
+}
+.project-home-board custom-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+}
+.project-home-board custom-stats .badge-danger {
+  background: #dc3545;
+  color: #fff;
+}
+.project-home-board custom-stats .badge-alert {
+  background: #212529;
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  project-home .custom-home-layout {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px;
+  }
+  project-home .custom-home-layout__sidebar {
+    display: none;
+  }
+}
+
+/* Keep record headers and routed content on the same compact gutter. */
+.project-record-shell > .custom-container-shell > .custom-container-shell__main {
+  padding: 0 24px 16px;
+}
+.project-record-shell .project-page {
+  max-width: none;
+  margin: 0;
+  padding: 12px 0 0;
+}
+.project-record-shell .project-page > .project-panel {
+  padding: 16px !important;
+}
+.project-record-shell .project-header {
+  padding: 12px 24px;
+}
+.project-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.project-header-main { min-width: 0; }
+.project-header-dates {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 24px;
+  margin-left: auto;
+}
+.project-date-label {
+  display: block;
+  margin-bottom: 4px;
+  color: #64748b;
+  font-size: 12px;
+}
+/* Shared date-badge fallback, as documented in frontend-date-badge.md. */
+.date-badge-inline,
+.date-badge-inline date-badge {
+  display: inline-flex;
+  align-items: flex-start;
+  width: max-content;
+  max-width: none;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.date-badge-inline date-badge .date-badge {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+  padding-bottom: 0;
+}
+.date-badge-inline date-badge .date-badge__icon,
+.date-badge-inline date-badge .date-badge__svg {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+}
+.date-badge-inline date-badge .date-badge__svg { display: block; }
+.date-badge-inline date-badge .date-badge__text { min-width: max-content; line-height: 1.05; }
+.date-badge-inline date-badge .date-badge__month { font-size: 14px; font-weight: 700; }
+.date-badge-inline date-badge .date-badge__year { font-size: 11px; opacity: .75; }
+.date-badge-large date-badge .date-badge__icon,
+.date-badge-large date-badge .date-badge__svg { width: 40px; height: 40px; flex-basis: 40px; }
+.date-badge-large date-badge .date-badge__month { font-size: 18px; }
+.date-badge-large date-badge .date-badge__year { font-size: 14px; }
+.project-phase-columns,
+.project-phase-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) 90px 90px minmax(100px, 24%);
+  align-items: center;
+  gap: 12px;
+  padding: 4px 8px;
+}
+.project-phase-row {
+  width: 100%;
+  min-height: 32px;
+  border: 0;
+  border-bottom: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background: transparent;
+  color: #334155;
+  text-align: left;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.project-phase-row:hover { background: #f8fafc; text-decoration: none; }
+.project-phase-row--selected,
+.project-phase-row--selected:hover { background: #dbeafe; }
+.project-phase-row:focus-visible { outline: 2px solid #2563eb; outline-offset: 1px; }
+.project-phase-title { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; }
+.project-phase-chevron { flex: 0 0 10px; color: #2563eb; }
+.project-phase-visuals { display: grid; gap: 6px; min-width: 0; }
+.project-phase-range { display: block; height: 6px; border-radius: 999px; background: #f1f5f9; }
+.project-phase-range > span { display: block; height: 100%; border-radius: inherit; }
+.project-phase-visuals project-progress { display: block; }
+.project-ui-choice { position: fixed; right: 16px; bottom: 16px; z-index: 1090; max-width: calc(100vw - 32px); }
+@media (max-width: 640px) {
+  .project-record-shell > .custom-container-shell > .custom-container-shell__main { padding-inline: 12px; }
+  .project-record-shell .project-header { padding-inline: 24px; }
+  .project-header-row { flex-wrap: wrap; }
+  .project-phase-columns { display: none; }
+  .project-phase-row { grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+  .project-phase-title, .project-phase-visuals { grid-column: 1 / -1; }
+}

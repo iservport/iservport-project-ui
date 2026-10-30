@@ -1,6 +1,6 @@
 @if (store.project(); as project) {
   <main class="project-page">
-    <section class="project-panel p-4">
+    <section class="project-panel p-3">
       <div class="d-flex gap-2 align-items-center flex-wrap mb-3">
         <h2 class="h5 me-auto">{{ 'PROJECT_ACTIVITIES' | i18n }}</h2>
         @if (store.canEdit()) {
@@ -30,65 +30,57 @@
       @if (stats()[selected()]; as stats) {
         <div class="mb-3">
           <project-progress [progress]="stats.progress" />
-          <div class="mt-2"><custom-stats [stats]="stats" /></div>
         </div>
       }
-      <div class="row g-3 mb-3">
-        <div class="col-md-4">
-          <label for="phase" class="form-label">{{ 'PROJECT_PHASE' | i18n }}</label
-          ><select
-            id="phase"
-            class="form-select"
-            [ngModel]="selected()"
-            (ngModelChange)="select($event)"
-          >
-            @for (p of phases(); track p.id) {
-              <option [ngValue]="p.id">{{ p.literal }} · {{ p.phaseName }}</option>
+      <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+        <custom-search-bar class="flex-grow-1"
+          [filter]="search"
+          [placeholder]="'PROJECT_SEARCH' | i18n"
+          (filterChange)="search = $event; load()"
+        />
+        @if (currentPhase() && store.canEdit()) {
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="editPhase()">
+              {{ 'PROJECT_EDIT_PHASE' | i18n }}
+            </button>
+            <button type="button" class="btn btn-outline-danger btn-sm" (click)="removePhase()">
+              {{ 'PROJECT_REMOVE' | i18n }}
+            </button>
+          </div>
+        }
+      </div>
+      <div class="project-schedule-filters d-flex align-items-center gap-3 flex-wrap mb-3">
+        <fieldset class="border-0 p-0 m-0 d-flex align-items-center gap-1 flex-wrap">
+          <legend class="visually-hidden">{{ 'PROJECT_STATUS' | i18n }}</legend>
+          @for (status of ['', 'P', 'T', 'D']; track status) {
+            <button type="button" class="btn btn-light btn-sm rounded-pill"
+              [class.active]="resolution === status"
+              [attr.aria-pressed]="resolution === status"
+              (click)="resolution = status; load()">
+              {{ (status ? statusLabel(status) : 'PROJECT_ALL') | i18n }}
+            </button>
+          }
+        </fieldset>
+        <fieldset class="border-0 p-0 m-0">
+          <legend class="visually-hidden">{{ 'PROJECT_VIEW' | i18n }}</legend>
+          <div class="btn-group btn-group-sm">
+            @for (mode of ['BOARD', 'TABLE']; track mode) {
+              <button type="button" class="btn btn-outline-secondary"
+                [class.active]="view === mode"
+                [attr.aria-pressed]="view === mode" (click)="view = mode">
+                {{ ('PROJECT_' + mode) | i18n }}
+              </button>
             }
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label" for="resolution">{{ 'PROJECT_STATUS' | i18n }}</label
-          ><select
-            id="resolution"
-            class="form-select"
-            [(ngModel)]="resolution"
-            (ngModelChange)="load()"
-          >
-            <option value="">{{ 'PROJECT_ALL' | i18n }}</option>
-            <option value="P">{{ 'PROJECT_TODO' | i18n }}</option>
-            <option value="T">{{ 'PROJECT_DOING' | i18n }}</option>
-            <option value="D">{{ 'PROJECT_DONE' | i18n }}</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label" for="view">{{ 'PROJECT_VIEW' | i18n }}</label
-          ><select id="view" class="form-select" [(ngModel)]="view">
-            <option value="BOARD">{{ 'PROJECT_BOARD' | i18n }}</option>
-            <option value="TABLE">{{ 'PROJECT_TABLE' | i18n }}</option>
-          </select>
-        </div>
+          </div>
+        </fieldset>
       </div>
       @if (currentPhase(); as phase) {
-        <div class="d-flex justify-content-between gap-2 mb-3">
-          <div class="project-prose" [innerHTML]="phase.contentAsString"></div>
-          @if (store.canEdit()) {
-            <div class="d-flex gap-2">
-              <button class="btn btn-outline-secondary btn-sm" (click)="editPhase()">
-                {{ 'PROJECT_EDIT_PHASE' | i18n }}</button
-              ><button class="btn btn-outline-danger btn-sm" (click)="removePhase()">
-                {{ 'PROJECT_REMOVE' | i18n }}
-              </button>
-            </div>
-          }
-        </div>
+        @if (phase.contentAsString) {
+          <div class="project-prose mb-2" [innerHTML]="phase.contentAsString"></div>
+        }
       }
-      <project-timeline [phases]="phases()" [projectId]="project.id" />
-      <custom-search-bar
-        [filter]="search"
-        [placeholder]="'PROJECT_SEARCH' | i18n"
-        (filterChange)="search = $event; load()"
-      />
+      <project-timeline [phases]="phases()" [projectId]="project.id" [selectable]="true"
+        [selectedId]="selected()" [stats]="stats()" (phaseSelect)="select($event)" />
       <div class="d-flex justify-content-between align-items-center my-3">
         <span class="text-secondary">{{ page().totalElements }} {{ 'PROJECT_RESULTS' | i18n }}</span
         ><custom-pagination [page]="page()" (change)="load($event)" />
@@ -124,9 +116,7 @@
                           [style.width.%]="report.complete"
                         ></div>
                       </div>
-                      <span class="small text-secondary">{{
-                        report.scheduledEndDate | date: 'dd/MM/yyyy'
-                      }}</span></a
+                      <span class="date-badge-inline"><date-badge [date]="report.scheduledEndDate" dateMode="calendar" [resolution]="report.resolution" /></span></a
                     >
                   }
                 }
@@ -152,7 +142,7 @@
                       <a [routerLink]="['/id', report.id]">{{ report.summary }}</a>
                     </td>
                     <td>{{ statusLabel(report.resolution) | i18n }}</td>
-                    <td>{{ report.scheduledEndDate | date: 'dd/MM/yyyy' }}</td>
+                    <td><span class="date-badge-inline"><date-badge [date]="report.scheduledEndDate" dateMode="calendar" [resolution]="report.resolution" /></span></td>
                   </tr>
                 }
               </tbody>

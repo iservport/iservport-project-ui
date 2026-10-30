@@ -1,0 +1,20 @@
+.project-schedule-filters .btn {
+  --bs-btn-padding-y: 0.125rem;
+  --bs-btn-padding-x: 0.5rem;
+  --bs-btn-font-size: 0.75rem;
+}
+
+.project-schedule-filters .btn-light {
+  --bs-btn-bg: #f8f9fa;
+  --bs-btn-color: #495057;
+  --bs-btn-border-color: #dee2e6;
+  --bs-btn-hover-bg: #e9ecef;
+  --bs-btn-hover-border-color: #ced4da;
+  --bs-btn-active-bg: #e9ecef;
+  --bs-btn-active-color: #212529;
+  --bs-btn-active-border-color: #adb5bd;
+}
+
+.project-schedule-filters .btn.active {
+  font-weight: 700;
+}

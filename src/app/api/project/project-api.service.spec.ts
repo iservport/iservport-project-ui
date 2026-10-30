@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ProjectApiService } from './project-api.service';
 import { emptyPage, type Phase, type Project } from './project.model';
+import { projectFilter } from '../../project.config';
 
 describe('Project legacy API boundaries', () => {
   let api: ProjectApiService;
@@ -15,6 +16,22 @@ describe('Project legacy API boundaries', () => {
     http = TestBed.inject(HttpTestingController);
   });
   afterEach(() => http.verify());
+
+  it('loads and saves the P1 dismissal under the registered home filter preference', () => {
+    api.homeFilterPreference().subscribe();
+    const read = http.expectOne('/app/user/preference?preferenceType=PROJECT_HOME_FILTER&preferenceKey=0');
+    expect(read.request.method).toBe('GET');
+    read.flush({ content: JSON.stringify({ hideUiChoice: true }) });
+
+    const filter = { ...projectFilter(), search: 'alpha', hideUiChoice: true };
+    filter.sections[0].checked = [17];
+    api.saveHomeFilterPreference(filter).subscribe();
+    const save = http.expectOne('/app/user/preference?preferenceType=PROJECT_HOME_FILTER&preferenceKey=0');
+    expect(save.request.method).toBe('PUT');
+    expect(JSON.parse(save.request.body)).toEqual(filter);
+    save.flush({ content: JSON.stringify(filter) });
+    http.expectNone('/app/user/preference/ui');
+  });
 
   it('converts paginator indexes once, without changing backend Page.number', () => {
     let returned = -1;

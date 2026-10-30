@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map } from 'rxjs';
+import type { FilterContainerModel } from '@iservport/iservport-angular-ui';
 import { PROJECT_API_ROOT } from './project.tokens';
 import type {
   ProjectStats,
@@ -24,6 +25,20 @@ export class ProjectApiService {
   private readonly http = inject(HttpClient);
   private readonly root = inject(PROJECT_API_ROOT);
   private readonly templates = '/app/custom/template';
+  private readonly homePreferenceParams = {
+    preferenceType: 'PROJECT_HOME_FILTER',
+    preferenceKey: '0',
+  };
+  homeFilterPreference() {
+    return this.http.get<{ content: string } | null>('/app/user/preference', {
+      params: this.homePreferenceParams,
+    });
+  }
+  saveHomeFilterPreference(filter: FilterContainerModel) {
+    return this.http.put('/app/user/preference', JSON.stringify(filter), {
+      params: this.homePreferenceParams,
+    });
+  }
   // Legacy controllers subtract one from pageNumber; returned Page.number stays zero-based.
   projectPage(filter: object, page = 0) {
     return this.http.post<Page<Project>>(`${this.root}/project/filter`, filter, {

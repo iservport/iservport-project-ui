@@ -28,5 +28,35 @@
     "secure": true,
     "changeOrigin": true,
     "logLevel": "debug"
+  },
+  "/report": {
+    "target": "https://iservport.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/assets": {
+    "target": "https://iservport.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/static": {
+    "target": "https://iservport.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/component": {
+    "target": "https://iservport.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/webjars": {
+    "target": "https://iservport.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
   }
 }
